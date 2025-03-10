@@ -1,0 +1,119 @@
+
+<link rel="stylesheet" href="style.css">
+<form>
+    <input name="campoCriaPost" placeholder="Digite o seu post">
+    <button type="submit">postar</button>
+</form>
+<ul class="listaDePosts">
+</ul>
+
+<script>
+    console.log('Olá pessoas!');
+    console.log('#ConstruindoCRUDS');
+    //base de dados
+    // [CRUD] JavaScript BÁSICO 
+    const miniRedeSocial = {
+        usuarios: [
+            {
+                username: 'omariosouto',
+            }
+        ],
+        posts: [
+            {
+                id: 1,
+                owner: 'omariosouto',
+                content: 'Meu primeiro tweet'
+            }
+        ],
+        readPost(){
+            miniRedeSocial.posts.forEach(({ owner, content}) => {
+             miniRedeSocial.criarPost({ owner: owner, content: content }, true);
+            })
+        },
+
+    // CREATE
+    criarPost(dados, htmlOnly = false) {
+        const id = miniRedeSocial.posts.length;
+
+        if(!htmlOnly) {
+        //cria post na memoria (ARRAY/OBJETO)
+        miniRedeSocial.posts.push({
+            id: miniRedeSocial.posts.length + 1,
+            owner: dados.owner,
+            content: dados.content
+         });
+    }
+         //cria post no HTML ]
+        const $listaDePosts = document.querySelector('.listaDePosts');
+        $listaDePosts.insertAdjacentHTML('afterbegin',`
+            <li data-id = "${id}">
+                <button class= "btn-delete">DELETE</button>
+                <span contenteditable>
+                    ${dados.content}  
+                </span>  
+            </li>
+            `);
+    },
+        apagaPost(id) {
+            const listaDePostsAtualizada = miniRedeSocial.posts.filter((postAtual) => {
+            return postAtual.id !== id;
+        })
+            console.log(listaDePostsAtualizada);
+            miniRedeSocial.posts = listaDePostsAtualizada;
+    },
+        atualizaContentDoPost(id, novoConteudo) {
+            const postQueVaiSerAtualizado = miniRedeSocial.posts.find((post) => {
+            return post.id === Number (id);
+    });
+            console.log(postQueVaiSerAtualizado)
+            postQueVaiSerAtualizado.content = novoConteudo
+}
+
+ };
+
+    //codigo do Front (WEB)
+    const $meuForm = document.querySelector('form');
+    console.log($meuForm);
+
+    //CRUD: [READ]
+    miniRedeSocial.readPost();
+    
+    //CRUD: [CREATE]
+    $meuForm.addEventListener('submit', function criaPostController(infosDoEvento){
+        infosDoEvento.preventDefault();
+        console.log("criando um novo formulario!");
+        const $campoCriaPost = document.querySelector('input[name="campoCriaPost"]');
+
+        miniRedeSocial.criarPost({ owner: 'omariosouto', content: $campoCriaPost.value }); 
+
+        $campoCriaPost.value = '';
+    })
+
+    //CRUD (DELETE)
+    document.querySelector('.listaDePosts').addEventListener('click', function(infosDoEvento){
+        console.log('Clicou!',);
+        const elementoAtual = infosDoEvento.target;
+        const isBtnDeleteClick = infosDoEvento.target.classList.contains('btn-delete');
+        if(isBtnDeleteClick){
+            const id = miniRedeSocial.posts.length;
+            console.log("Clicou no botão de deletar!", elementoAtual.parentNode.getAttribute('data-id'));
+            
+            
+            // Manipula o lado do serverSide /Banco De Dados /Arquivo /Fonte!
+            miniRedeSocial.apagaPost(id);
+            // Manipula a View
+            elementoAtual.parentNode.remove();
+        }
+
+    })
+
+    //CRUD (UPDATE)
+    document.querySelector('.listaDePosts').addEventListener('input', function(infosDoEvento){
+        console.log('Alteração',);
+        const elementoAtual = infosDoEvento.target;
+        const id = elementoAtual.parentNode.target.getAttribute('data-id')
+
+    
+        miniRedeSocial.atualizaContentDoPost(id, elementoAtual.innerText)
+    });
+</script>
